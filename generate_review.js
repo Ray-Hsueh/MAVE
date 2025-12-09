@@ -1,0 +1,206 @@
+const fs = require('fs');
+
+const EVENTS = [
+    { id: 'none', name: '無活動 (預設)', rarity: 1, duration: 365 },
+    { id: 'shiny', name: '色違', rarity: 0.000488, duration: 365 },
+    { id: 'night', name: '末班車', rarity: 0.001953125, duration: 365 },
+    { id: 'xmas', name: '耶誕節', rarity: 0.25, duration: 7 },
+    { id: 'sfd', name: '軟體自由日', rarity: 0.9, duration: 7 },
+    { id: 'pride', name: 'PRIDE', rarity: 0.25, duration: 30 },
+    { id: 'moon', name: '中秋節', rarity: 0.15, duration: 14 },
+    { id: 'dragon', name: '端午節連假', rarity: 0.55, duration: 3 },
+    { id: 'mother', name: '母親節', rarity: 0.2, duration: 14 },
+    { id: 'anniv', name: '中和新蘆線全線通車12週年紀念', rarity: 0.629, duration: 7 }
+];
+
+const STATIONS = [
+    { name: "頂埔", regime: "板南線", type: "起點站", rarity: 86 },
+    { name: "永寧", regime: "板南線", type: "捷運車站", rarity: 59 },
+    { name: "土城", regime: "板南線", type: "捷運車站", rarity: 90 },
+    { name: "海山", regime: "板南線", type: "捷運車站", rarity: 35 },
+    { name: "亞東醫院", regime: "板南線", type: "捷運車站", rarity: 34 },
+    { name: "府中", regime: "板南線", type: "捷運車站", rarity: 21 },
+    { name: "板橋", regime: "板南線/環狀線", type: "複合型車站", rarity: 6 },
+    { name: "新埔", regime: "板南線/環狀線", type: "轉乘站", rarity: 9 },
+    { name: "江子翠", regime: "板南線", type: "捷運車站", rarity: 25 },
+    { name: "龍山寺", regime: "板南線", type: "捷運車站", rarity: 19 },
+    { name: "西門", regime: "板南線/松山新店線", type: "轉乘站", rarity: 2 },
+    { name: "台北車站", regime: "板南線/淡水信義線", type: "複合型車站", rarity: 1 },
+    { name: "善導寺", regime: "板南線", type: "捷運車站", rarity: 37 },
+    { name: "忠孝新生", regime: "板南線/中和新蘆線", type: "轉乘站", rarity: 10 },
+    { name: "忠孝復興", regime: "板南線/文湖線", type: "轉乘站", rarity: 5 },
+    { name: "忠孝敦化", regime: "板南線", type: "捷運車站", rarity: 13 },
+    { name: "國父紀念館", regime: "板南線", type: "捷運車站", rarity: 41 },
+    { name: "市政府", regime: "板南線", type: "捷運車站", rarity: 3 },
+    { name: "永春", regime: "板南線", type: "捷運車站", rarity: 45 },
+    { name: "後山埤", regime: "板南線", type: "捷運車站", rarity: 50 },
+    { name: "昆陽", regime: "板南線", type: "捷運車站", rarity: 59 },
+    { name: "南港", regime: "板南線", type: "複合型車站", rarity: 37 },
+    { name: "南港展覽館", regime: "板南線/文湖線", type: "轉乘站", rarity: 22 },
+    { name: "淡水", regime: "淡水信義線", type: "起點站", rarity: 7 },
+    { name: "紅樹林", regime: "淡水信義線", type: "捷運車站", rarity: 55 },
+    { name: "竹圍", regime: "淡水信義線", type: "捷運車站", rarity: 79 },
+    { name: "關渡", regime: "淡水信義線", type: "捷運車站", rarity: 64 },
+    { name: "忠義", regime: "淡水信義線", type: "捷運車站", rarity: 113 },
+    { name: "復興崗", regime: "淡水信義線", type: "捷運車站", rarity: 103 },
+    { name: "北投", regime: "淡水信義線/新北投支線", type: "轉乘站", rarity: 45 },
+    { name: "新北投", regime: "淡水信義線/新北投支線", type: "捷運車站", rarity: 96 },
+    { name: "奇岩", regime: "淡水信義線", type: "捷運車站", rarity: 90 },
+    { name: "唭哩岸", regime: "淡水信義線", type: "捷運車站", rarity: 90 },
+    { name: "石牌", regime: "淡水信義線", type: "捷運車站", rarity: 18 },
+    { name: "明德", regime: "淡水信義線", type: "捷運車站", rarity: 64 },
+    { name: "芝山", regime: "淡水信義線", type: "捷運車站", rarity: 31 },
+    { name: "士林", regime: "淡水信義線", type: "捷運車站", rarity: 19 },
+    { name: "劍潭", regime: "淡水信義線", type: "捷運車站", rarity: 15 },
+    { name: "圓山", regime: "淡水信義線", type: "捷運車站", rarity: 17 },
+    { name: "民權西路", regime: "淡水信義線/中和新蘆線", type: "轉乘站", rarity: 35 },
+    { name: "雙連", regime: "淡水信義線", type: "捷運車站", rarity: 40 },
+    { name: "中山", regime: "淡水信義線/松山新店線", type: "轉乘站", rarity: 4 },
+    { name: "台大醫院", regime: "淡水信義線", type: "捷運車站", rarity: 41 },
+    { name: "中正紀念堂", regime: "淡水信義線/松山新店線", type: "轉乘站", rarity: 28 },
+    { name: "東門", regime: "淡水信義線/中和新蘆線", type: "轉乘站", rarity: 26 },
+    { name: "大安森林公園", regime: "淡水信義線", type: "捷運車站", rarity: 74 },
+    { name: "大安", regime: "淡水信義線/文湖線", type: "轉乘站", rarity: 31 },
+    { name: "信義安和", regime: "淡水信義線", type: "捷運車站", rarity: 47 },
+    { name: "台北101/世貿", regime: "淡水信義線", type: "捷運車站", rarity: 13 },
+    { name: "象山", regime: "淡水信義線", type: "捷運車站", rarity: 59 },
+    { name: "動物園", regime: "文湖線", type: "起點站", rarity: 86 },
+    { name: "木柵", regime: "文湖線", type: "捷運車站", rarity: 103 },
+    { name: "萬芳社區", regime: "文湖線", type: "捷運車站", rarity: 119 },
+    { name: "萬芳醫院", regime: "文湖線", type: "捷運車站", rarity: 70 },
+    { name: "辛亥", regime: "文湖線", type: "捷運車站", rarity: 110 },
+    { name: "麟光", regime: "文湖線", type: "捷運車站", rarity: 103 },
+    { name: "六張犁", regime: "文湖線", type: "捷運車站", rarity: 79 },
+    { name: "科技大樓", regime: "文湖線", type: "捷運車站", rarity: 55 },
+    { name: "南京復興", regime: "文湖線/松山新店線", type: "轉乘站", rarity: 8 },
+    { name: "中山國中", regime: "文湖線", type: "捷運車站", rarity: 64 },
+    { name: "松山機場", regime: "文湖線", type: "捷運車站", rarity: 99 },
+    { name: "大直", regime: "文湖線", type: "捷運車站", rarity: 86 },
+    { name: "劍南路", regime: "文湖線/環狀線", type: "轉乘站", rarity: 64 },
+    { name: "西湖", regime: "文湖線", type: "捷運車站", rarity: 59 },
+    { name: "港墘", regime: "文湖線", type: "捷運車站", rarity: 50 },
+    { name: "文德", regime: "文湖線", type: "捷運車站", rarity: 98 },
+    { name: "內湖", regime: "文湖線", type: "捷運車站", rarity: 79 },
+    { name: "大湖公園", regime: "文湖線", type: "捷運車站", rarity: 110 },
+    { name: "葫洲", regime: "文湖線", type: "捷運車站", rarity: 90 },
+    { name: "東湖", regime: "文湖線", type: "捷運車站", rarity: 90 },
+    { name: "南港軟體園區", regime: "文湖線", type: "捷運車站", rarity: 99 },
+    { name: "南勢角", regime: "中和新蘆線", type: "起點站", rarity: 41 },
+    { name: "景安", regime: "中和新蘆線/環狀線", type: "轉乘站", rarity: 29 },
+    { name: "永安市場", regime: "中和新蘆線", type: "捷運車站", rarity: 28 },
+    { name: "頂溪", regime: "中和新蘆線", type: "捷運車站", rarity: 10 },
+    { name: "古亭", regime: "中和新蘆線/松山新店線", type: "轉乘站", rarity: 15 },
+    { name: "松江南京", regime: "中和新蘆線/松山新店線", type: "轉乘站", rarity: 12 },
+    { name: "行天宮", regime: "中和新蘆線", type: "捷運車站", rarity: 24 },
+    { name: "中山國小", regime: "中和新蘆線", type: "捷運車站", rarity: 48 },
+    { name: "大橋頭", regime: "中和新蘆線", type: "轉乘站", rarity: 59 },
+    { name: "台北橋", regime: "中和新蘆線", type: "捷運車站", rarity: 74 },
+    { name: "菜寮", regime: "中和新蘆線", type: "捷運車站", rarity: 79 },
+    { name: "三重", regime: "中和新蘆線", type: "轉乘站", rarity: 90 },
+    { name: "先嗇宮", regime: "中和新蘆線", type: "捷運車站", rarity: 103 },
+    { name: "頭前庄", regime: "中和新蘆線/環狀線", type: "轉乘站", rarity: 97 },
+    { name: "新莊", regime: "中和新蘆線", type: "捷運車站", rarity: 74 },
+    { name: "輔大", regime: "中和新蘆線", type: "捷運車站", rarity: 74 },
+    { name: "丹鳳", regime: "中和新蘆線", type: "轉乘站", rarity: 85 },
+    { name: "迴龍", regime: "中和新蘆線", type: "起點站", rarity: 64 },
+    { name: "三重國小", regime: "中和新蘆線", type: "捷運車站", rarity: 70 },
+    { name: "三和國中", regime: "中和新蘆線", type: "捷運車站", rarity: 70 },
+    { name: "徐匯中學", regime: "中和新蘆線", type: "捷運車站", rarity: 64 },
+    { name: "三民高中", regime: "中和新蘆線", type: "捷運車站", rarity: 70 },
+    { name: "蘆洲", regime: "中和新蘆線", type: "起點站", rarity: 55 },
+    { name: "新店", regime: "松山新店線", type: "起點站", rarity: 50 },
+    { name: "新店區公所", regime: "松山新店線", type: "捷運車站", rarity: 64 },
+    { name: "七張", regime: "松山新店線/小碧潭支線", type: "轉乘站", rarity: 50 },
+    { name: "大坪林", regime: "松山新店線/環狀線", type: "轉乘站", rarity: 33 },
+    { name: "景美", regime: "松山新店線", type: "捷運車站", rarity: 48 },
+    { name: "萬隆", regime: "松山新店線", type: "捷運車站", rarity: 79 },
+    { name: "公館", regime: "松山新店線", type: "捷運車站", rarity: 22 },
+    { name: "台電大樓", regime: "松山新店線", type: "捷運車站", rarity: 50 },
+    { name: "小南門", regime: "松山新店線", type: "捷運車站", rarity: 85 },
+    { name: "北門", regime: "松山新店線", type: "捷運車站", rarity: 55 },
+    { name: "台北小巨蛋", regime: "松山新店線", type: "捷運車站", rarity: 41 },
+    { name: "南京三民", regime: "松山新店線", type: "捷運車站", rarity: 37 },
+    { name: "松山", regime: "松山新店線", type: "捷運車站", rarity: 30 },
+    { name: "小碧潭", regime: "松山新店線/小碧潭支線", type: "轉乘站", rarity: 110 },
+    { name: "十四張", regime: "環狀線/安坑輕軌", type: "轉乘站", rarity: 103 },
+    { name: "秀朗橋", regime: "環狀線", type: "捷運車站", rarity: 113 },
+    { name: "景平", regime: "環狀線", type: "捷運車站", rarity: 103 },
+    { name: "中和", regime: "環狀線", type: "捷運車站", rarity: 99 },
+    { name: "橋和", regime: "環狀線", type: "捷運車站", rarity: 113 },
+    { name: "中原", regime: "環狀線", type: "捷運車站", rarity: 113 },
+    { name: "板新", regime: "環狀線", type: "捷運車站", rarity: 113 },
+    { name: "板橋Y", regime: "環狀線/板南線", type: "轉乘站", rarity: 79 },
+    { name: "新埔民生", regime: "環狀線/板南線", type: "轉乘站", rarity: 113 },
+    { name: "幸福", regime: "環狀線", type: "捷運車站", rarity: 103 },
+    { name: "新北產業園區", regime: "環狀線", type: "起點站", rarity: 99 },
+    { name: "機捷台北車站", regime: "桃園機場捷運", type: "起點站", rarity: 19 },
+    { name: "機捷三重站", regime: "桃園機場捷運", type: "轉乘站", rarity: 90 },
+    { name: "機捷新北產業園區", regime: "桃園機場捷運", type: "轉乘站", rarity: 86 },
+    { name: "新莊副都心", regime: "桃園機場捷運", type: "捷運車站", rarity: 99 },
+    { name: "泰山", regime: "桃園機場捷運", type: "捷運車站", rarity: 103 },
+    { name: "泰山貴和", regime: "桃園機場捷運", type: "捷運車站", rarity: 99 },
+    { name: "體育大學", regime: "桃園機場捷運", type: "捷運車站", rarity: 90 },
+    { name: "長庚醫院", regime: "桃園機場捷運", type: "捷運車站", rarity: 72 },
+    { name: "林口", regime: "桃園機場捷運", type: "捷運車站", rarity: 90 },
+    { name: "山鼻", regime: "桃園機場捷運", type: "捷運車站", rarity: 99 },
+    { name: "坑口", regime: "桃園機場捷運", type: "捷運車站", rarity: 110 },
+    { name: "機場第一航廈", regime: "桃園機場捷運", type: "複合型車站", rarity: 56 },
+    { name: "機場第二航廈", regime: "桃園機場捷運", type: "複合型車站", rarity: 64 },
+    { name: "機場旅館", regime: "桃園機場捷運", type: "捷運車站", rarity: 110 },
+    { name: "大園", regime: "桃園機場捷運", type: "捷運車站", rarity: 103 },
+    { name: "橫山", regime: "桃園機場捷運", type: "捷運車站", rarity: 113 },
+    { name: "領航", regime: "桃園機場捷運", type: "捷運車站", rarity: 110 },
+    { name: "高鐵桃園站", regime: "桃園機場捷運", type: "複合型車站", rarity: 64 },
+    { name: "桃園體育園區", regime: "桃園機場捷運", type: "捷運車站", rarity: 110 },
+    { name: "興南", regime: "桃園機場捷運", type: "捷運車站", rarity: 120 },
+    { name: "環北", regime: "桃園機場捷運", type: "捷運車站", rarity: 103 },
+    { name: "老街溪", regime: "桃園機場捷運", type: "捷運車站", rarity: 99 }
+];
+
+function calculateValue(ballRarity, event) {
+    if (ballRarity === 0) return 0;
+
+    const K = 10000;
+    const specialRarity = event.rarity;
+    const duration = event.duration;
+
+    const multiplier = Math.sqrt((1 / specialRarity) * (365 / duration));
+    const value = (K / ballRarity) * multiplier;
+
+    return Math.round(value);
+}
+
+let output = "# MAVE Valuation Review\n\n";
+output += "This document lists the calculated values for all stations across all events using the current formula.\n\n";
+output += "## Formula\n";
+output += "`Value = Round( (10000 / BallRarity) * Sqrt( (1 / EventRarity) * (365 / EventDuration) ) )`\n\n";
+
+output += "## Event Multipliers\n";
+output += "| Event ID | Name | Rarity | Duration | Multiplier |\n";
+output += "|---|---|---|---|---|\n";
+EVENTS.forEach(e => {
+    const m = Math.sqrt((1 / e.rarity) * (365 / e.duration));
+    output += `| ${e.id} | ${e.name} | ${e.rarity} | ${e.duration} | ${m.toFixed(4)} |\n`;
+});
+output += "\n";
+
+output += "## Station Values\n\n";
+output += "| Station | Rarity | Base (None) | " + EVENTS.filter(e => e.id !== 'none').map(e => e.name).join(" | ") + " |\n";
+output += "|---|---|---|" + EVENTS.filter(e => e.id !== 'none').map(() => "---").join("|") + "|\n";
+
+STATIONS.forEach(s => {
+    let row = `| ${s.name} | ${s.rarity} |`;
+
+    EVENTS.forEach(e => {
+        const val = calculateValue(s.rarity, e);
+        if (e.id === 'none') {
+            row += ` ${val} |`;
+        } else {
+            row += ` ${val} |`;
+        }
+    });
+    output += row + "\n";
+});
+
+fs.writeFileSync('valuation_review.md', output);
+console.log('Markdown generated.');
