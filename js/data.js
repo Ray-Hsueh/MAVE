@@ -1,6 +1,6 @@
 export const EVENTS = [
     { id: 'none', name: '無活動 (預設)', rarity: 1, duration: 365 },
-    { id: 'shiny', name: '色違', rarity: 0.000488, duration: 365 },
+    { id: 'shiny', name: '色違', rarity: 0.00048828125, duration: 365 },
     { id: 'night', name: '末班車', rarity: 0.001953125, duration: 365 },
     { id: 'xmas', name: '耶誕節', rarity: 0.25, duration: 7 },
     { id: 'sfd', name: '軟體自由日', rarity: 0.9, duration: 7 },
