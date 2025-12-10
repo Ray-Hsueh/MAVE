@@ -29,7 +29,11 @@ class MaveApp {
             cartSidebar: document.getElementById('cart-sidebar'),
             cartToggle: document.getElementById('cart-toggle'),
             mobileBadge: document.getElementById('mobile-cart-badge'),
-            activeEventDisplay: document.getElementById('active-event-display')
+
+            activeEventDisplay: document.getElementById('active-event-display'),
+            mobileBackdrop: document.getElementById('mobile-backdrop'),
+            cartIcon: document.getElementById('cart-icon'),
+            closeIcon: document.getElementById('close-icon')
         };
 
         this.init();
@@ -97,7 +101,11 @@ class MaveApp {
         });
 
         this.dom.cartToggle.addEventListener('click', () => {
-            this.dom.cartSidebar.classList.toggle('translate-x-full');
+            this.toggleMobileCart();
+        });
+
+        this.dom.mobileBackdrop.addEventListener('click', () => {
+            this.toggleMobileCart(false);
         });
     }
 
@@ -113,6 +121,30 @@ class MaveApp {
 
         this.state.filterRegime = clickedBtn.dataset.regime;
         this.renderStations();
+
+    }
+
+    toggleMobileCart(forceState) {
+        const isClosed = this.dom.cartSidebar.classList.contains('translate-x-full');
+        const shouldOpen = forceState !== undefined ? forceState : isClosed;
+
+        if (shouldOpen) {
+            this.dom.cartSidebar.classList.remove('translate-x-full');
+            this.dom.mobileBackdrop.classList.remove('hidden');
+
+            // Icon Animation
+            this.dom.cartIcon.classList.add('opacity-0', 'rotate-90');
+            this.dom.closeIcon.classList.remove('opacity-0', 'rotate-90');
+            this.dom.mobileBadge.classList.add('opacity-0');
+        } else {
+            this.dom.cartSidebar.classList.add('translate-x-full');
+            this.dom.mobileBackdrop.classList.add('hidden');
+
+            // Icon Animation
+            this.dom.cartIcon.classList.remove('opacity-0', 'rotate-90');
+            this.dom.closeIcon.classList.add('opacity-0', 'rotate-90');
+            this.dom.mobileBadge.classList.remove('opacity-0');
+        }
     }
 
     addToCart(stationName) {

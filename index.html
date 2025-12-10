@@ -40,7 +40,7 @@
     </script>
 </head>
 
-<body class="bg-gray-950 text-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-950 text-gray-100 font-sans h-[100dvh] flex flex-col overflow-hidden">
 
     <!-- Header -->
     <header class="glass z-50 px-6 py-4 flex flex-col md:flex-row items-center justify-between shadow-lg shrink-0">
@@ -143,6 +143,10 @@
             </div>
         </main>
 
+        <!-- Mobile Backdrop -->
+        <div id="mobile-backdrop"
+            class="absolute inset-0 bg-black/50 z-30 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
         <!-- Right Panel: Trading Cart -->
         <aside
             class="w-80 bg-gray-900 border-l border-gray-800 flex flex-col shrink-0 z-40 shadow-2xl transition-transform duration-300 absolute right-0 top-0 bottom-0 md:relative md:h-full translate-x-full md:translate-x-0"
@@ -206,14 +210,19 @@
 
         <!-- Mobile Cart Toggle -->
         <button id="cart-toggle"
-            class="md:hidden absolute bottom-6 right-6 w-14 h-14 bg-indigo-600 rounded-full shadow-lg flex items-center justify-center text-white z-50 hover:bg-indigo-500 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 rounded-full shadow-lg flex items-center justify-center text-white z-50 hover:bg-indigo-500 transition-colors active:scale-90">
+            <svg id="cart-icon" class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                 </path>
             </svg>
+            <svg id="close-icon" class="w-6 h-6 absolute opacity-0 rotate-90 transition-all duration-300" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
             <span id="mobile-cart-badge"
-                class="absolute -top-1 -right-1 bg-red-500 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full hidden">0</span>
+                class="absolute -top-1 -right-1 bg-red-500 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full hidden transition-opacity duration-300">0</span>
         </button>
 
     </div>
