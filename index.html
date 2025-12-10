@@ -14,6 +14,9 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
@@ -57,10 +60,19 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <label for="event-select" class="text-sm text-gray-300 font-medium">目前活動：</label>
+            <button id="info-btn"
+                class="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-800"
+                title="關於 MAVE">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
+            <div class="h-6 w-px bg-gray-700 hidden md:block"></div>
+            <label for="event-select" class="text-sm text-gray-300 font-medium hidden md:block">目前活動：</label>
             <div class="relative">
                 <select id="event-select"
-                    class="appearance-none bg-gray-800 border border-gray-700 text-white py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer min-w-[200px]">
+                    class="appearance-none bg-gray-800 border border-gray-700 text-white py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer min-w-[160px] md:min-w-[200px]">
                     <!-- Options populated by JS -->
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
@@ -227,8 +239,118 @@
 
     </div>
 
+    <!-- Info Modal -->
+    <div id="info-modal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity opacity-0" id="info-modal-backdrop">
+        </div>
+
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <!-- Modal Panel -->
+                <div class="relative transform overflow-hidden rounded-2xl bg-gray-900 border border-gray-700 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    id="info-modal-panel">
+
+                    <!-- Header -->
+                    <div
+                        class="bg-gray-800/50 px-4 py-4 sm:px-6 flex justify-between items-center border-b border-gray-700">
+                        <h3 class="text-lg font-bold leading-6 text-white flex items-center gap-2" id="modal-title">
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            關於 MAVE
+                        </h3>
+                        <button type="button" id="close-modal-btn"
+                            class="text-gray-400 hover:text-white transition-colors rounded-lg p-1 hover:bg-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div
+                        class="px-4 py-6 sm:px-6 space-y-6 text-gray-300 text-sm leading-relaxed max-h-[70vh] overflow-y-auto custom-scrollbar">
+
+                        <!-- Introduction -->
+                        <section>
+                            <h4 class="text-indigo-400 font-bold mb-2 text-base">什麼是 MAVE？</h4>
+                            <p>
+                                <strong>MAVE</strong> (Metroballs Asset Valuation Engine) 是一個專為
+                                <strong>TaipeiMetroDex</strong> 社群設計的資產估值工具。
+                                它可以幫助玩家計算手中站點（Balls）在不同活動加成下的理論價值，讓交易與收藏更具參考依據。
+                            </p>
+                        </section>
+
+                        <!-- Formula -->
+                        <section class="bg-gray-950/50 rounded-xl p-4 border border-gray-800">
+                            <h4 class="text-green-400 font-bold mb-3 text-base">估值公式</h4>
+                            <div id="math-formula" class="flex justify-center items-center py-4 overflow-x-auto">
+                                <!-- KaTeX rendered formula will appear here -->
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-xs text-gray-400 mt-4">
+                                <li><span class="font-mono text-white">V</span> : 最終估值 (Value)</li>
+                                <li><span class="font-mono text-white">K</span> : 基礎常數 (10,000)</li>
+                                <li><span class="font-mono text-white">R</span> : 站點稀有度 (Ball Rarity)</li>
+                                <li><span class="font-mono text-white">Sr</span> : 活動特殊稀有度 (Special Event Rarity)</li>
+                                <li><span class="font-mono text-white">D</span> : 活動持續天數 (Duration)</li>
+                            </ul>
+                            <p class="mt-3 text-xs italic text-gray-500">
+                                * 此公式旨在反映稀有度與活動時間對價值的影響，僅供參考，實際交易價值由市場決定。
+                            </p>
+                        </section>
+
+                        <!-- Usage -->
+                        <section>
+                            <h4 class="text-purple-400 font-bold mb-2 text-base">如何使用？</h4>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li><span class="text-white">選擇活動</span>：在上方選單選擇當前或特定的活動，估值會隨之變化。</li>
+                                <li><span class="text-white">篩選站點</span>：使用搜尋或路線按鈕找到你擁有的站點。</li>
+                                <li><span class="text-white">加入清單</span>：點擊站點卡片將其加入右側（手機為下方）的交易清單。</li>
+                                <li><span class="text-white">查看估值</span>：清單會自動計算總估值。</li>
+                                <li><span class="text-white">分享組合</span>：點擊「複製清單」按鈕，將你的資產組合與總值分享給其他玩家。</li>
+                            </ol>
+                        </section>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <div
+                        class="flex flex-row-reverse justify-center border-t border-gray-700 bg-gray-800/50 px-4 py-3 sm:px-6 sm:justify-end">
+                        <button type="button" id="modal-ok-btn"
+                            class="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 sm:ml-3 sm:w-auto">
+                            了解
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Logic -->
     <script type="module" src="js/app.js"></script>
+
+    <!-- Render Math Formula -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Wait for KaTeX to load if it hasn't already (though defer should handle it)
+            const renderFormula = () => {
+                if (window.katex) {
+                    katex.render("V = \\frac{K}{R} \\times \\sqrt{\\frac{1}{S_r} \\times \\frac{365}{D}}", document.getElementById("math-formula"), {
+                        throwOnError: false,
+                        displayMode: true,
+                        output: 'html'
+                    });
+                } else {
+                    setTimeout(renderFormula, 100);
+                }
+            };
+            renderFormula();
+        });
+    </script>
 </body>
 
 </html>

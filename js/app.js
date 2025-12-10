@@ -33,7 +33,13 @@ class MaveApp {
             activeEventDisplay: document.getElementById('active-event-display'),
             mobileBackdrop: document.getElementById('mobile-backdrop'),
             cartIcon: document.getElementById('cart-icon'),
-            closeIcon: document.getElementById('close-icon')
+            closeIcon: document.getElementById('close-icon'),
+            infoBtn: document.getElementById('info-btn'),
+            infoModal: document.getElementById('info-modal'),
+            infoModalBackdrop: document.getElementById('info-modal-backdrop'),
+            infoModalPanel: document.getElementById('info-modal-panel'),
+            closeModalBtn: document.getElementById('close-modal-btn'),
+            modalOkBtn: document.getElementById('modal-ok-btn')
         };
 
         this.init();
@@ -107,6 +113,12 @@ class MaveApp {
         this.dom.mobileBackdrop.addEventListener('click', () => {
             this.toggleMobileCart(false);
         });
+
+        // Info Modal Events
+        this.dom.infoBtn.addEventListener('click', () => this.toggleInfoModal(true));
+        this.dom.closeModalBtn.addEventListener('click', () => this.toggleInfoModal(false));
+        this.dom.modalOkBtn.addEventListener('click', () => this.toggleInfoModal(false));
+        this.dom.infoModalBackdrop.addEventListener('click', () => this.toggleInfoModal(false));
     }
 
     handleFilterClick(clickedBtn) {
@@ -144,6 +156,23 @@ class MaveApp {
             this.dom.cartIcon.classList.remove('opacity-0', 'rotate-90');
             this.dom.closeIcon.classList.add('opacity-0', 'rotate-90');
             this.dom.mobileBadge.classList.remove('opacity-0');
+        }
+    }
+
+    toggleInfoModal(show) {
+        if (show) {
+            this.dom.infoModal.classList.remove('hidden');
+            // Trigger reflow
+            void this.dom.infoModal.offsetWidth;
+            this.dom.infoModalBackdrop.classList.remove('opacity-0');
+            this.dom.infoModalPanel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+        } else {
+            this.dom.infoModalBackdrop.classList.add('opacity-0');
+            this.dom.infoModalPanel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+
+            setTimeout(() => {
+                this.dom.infoModal.classList.add('hidden');
+            }, 300); // Match transition duration
         }
     }
 
